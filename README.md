@@ -1,18 +1,18 @@
 # Summary
 
-* [Bootstraping code coverage on top of Triton](#bootstraping-code-coverage-on-top-of-triton)
+* [Bootstrapping code coverage on top of Triton](#bootstrapping-code-coverage-on-top-of-triton)
 * [Harness your target](#harness-your-target)
 * [The output](#output)
 * [The corpus](#the-corpus)
-* [Sharing corpus between libfuzzer and ttexplore](#sharing-corpus-between-libfuzzer-and-ttexplore)
-* [The ttexplore config structure](#the-ttexplore-config-structure)
+* [Sharing corpus between libfuzzer and TTexplore](#sharing-corpus-between-libfuzzer-and-TTexplore)
+* [The TTexplore config structure](#the-TTexplore-config-structure)
 
-# Bootstraping code coverage on top of Triton
+# Bootstrapping code coverage on top of Triton
 
 [Triton](https://github.com/jonathansalwan/Triton) is a dynamic binary analysis library that aims to provide components
 such as dynamic symbolic execution, but lets the user define its own strategy in order to cover code. This repository
-aims to provide a bootstrap code for doing paths exploration on top of the Triton library. The [ttexplore](./lib/ttexplore.cpp) library exposes
-a `SymbolicExplorator` class that takes as input a `triton::Context`. This context is used as the initial point for the paths
+aims to provide a bootstrap code for doing path exploration on top of the Triton library. The [TTexplore](./lib/ttexplore.cpp) library exposes
+a `SymbolicExplorator` class that takes as input a `triton::Context`. This context is used as the initial point for the path
 exploration. Then, it does a classical snapshot-based code coverage process. The logic is the following:
 
 1. Save the initial context as backup
@@ -21,7 +21,7 @@ exploration. Then, it does a classical snapshot-based code coverage process. The
 4. Restore the backup
 5. Go to point 2
 
-Note that `ttexplore` is not an advanced library. It's just a bootstrap code that provide a simple coverage logic. Consider this project as a base example about how to cover code with Triton. You will probably adapt it according to your targets and goals. That's why the code of the library aims to be as small as possible.
+Note that TTexplore is not an advanced library. It's just a bootstrap code that provide a simple coverage logic. Consider this project as a base example about how to cover code with Triton. You will probably adapt it according to your targets and goals. That's why the code of the library aims to be as small as possible.
 
 ## Harness your target
 
@@ -127,11 +127,11 @@ int main(int ac, const char *av[]) {
   return 0;
   ```
 
-Harnessing your target with `ttexplore` only consist to craft the `triton::Context` with the appropriate state. It can be initialized from a memory dump, a raw binary or by hand. It can be user or kernel code. The main point is that `ttexplore` will not emulate nor execute external calls, so your `triton::Context` must handle them before starting the exploration. For example see how `strncasecmp` is handle in the above harness.
+Harnessing your target with TTexplore only consist to craft the `triton::Context` with the appropriate state. It can be initialized from a memory dump, a raw binary or by hand. It can be user or kernel code. The main point is that TTexplore will not emulate nor execute external calls, so your `triton::Context` must handle them before starting the exploration. For example, see how `strncasecmp` is handled in the above harness.
 
 ## Output
 
-After compiling the harness with the `ttexplore` library. The output is the following:
+After compiling the harness with the TTexplore library. The output is the following:
 
 ```raw
 $ ./build/harness4 ./harness/4/target/test-strcmp
@@ -304,7 +304,7 @@ $ ./build/harness4 ./harness/4/target/test-strcmp
 
 The output format is the following:
 
-* `[TT]`: verbose from ttexplore
+* `[TT]`: verbose from TTexplore
 * `exec`: number of executions
 * `icov`: number of unique instructions covered
 * `sat`: number of queries that are sat
@@ -485,7 +485,7 @@ $ strings workspace/corpus/*
 012387654321abcdefhiklmnopqrzyxwvutsrqponmlkjihgf
 ```
 
-# Sharing corpus between libfuzzer and ttexplore
+# Sharing corpus between libfuzzer and TTexplore
 
 Nowadays combining multiple sources of fuzzer and sharing seeds is something relevant. This is something that can be quickly done here. Let's consider the following snippet:
 
@@ -505,7 +505,7 @@ extern "C" int LLVMFuzzerTestOneInput(const char* data, size_t size) {
 
 If we compile this snippet with libfuzzer without optimization (`clang++ -g -O0 -fsanitize=fuzzer,memory target.cpp`), libfuzzer will run for a while before finding `r * 2 == 0xdeadbef0`. In other hand, this kind of constraints are really easy to solve using symbolic execution. So, combining dynamic symbolic execution and runtime fuzzing is something very interesting.
 
-The only thing we have to do is to run libfuzzer with 2 jobs and defining a corpus directory (here the ttexplore workspace). Note that we have to run at least 2 jobs, otherwise libfuzzer will not refresh its corpus, which is an issue as we need to share seeds from ttexplore and libfuzzer.
+The only thing we have to do is to run libfuzzer with 2 jobs and defining a corpus directory (here the TTexplore workspace). Note that we have to run at least 2 jobs, otherwise libfuzzer will not refresh its corpus, which is an issue as we need to share seeds from TTexplore and libfuzzer.
 
 So, in a first console, let's run libfuzzer like this:
 
@@ -513,19 +513,19 @@ So, in a first console, let's run libfuzzer like this:
 $ ./harness/6/target/target-libfuzzer -jobs=2 ./workspace/corpus
 ```
 
-And in another console, let's run our ttexplore harness like this:
+And in another console, let's run our TTexplore harness like this:
 
 ```console
 $ ./build/harness6
 ```
 
-As soon as ttexplore will find a model which solves `r * 2 == 0xdeadbef0`, it will write the seed into the `./workspace/corpus` directory and at the next libfuzzer refresh, libfuzzer will trigger the `__builtin_trap`. 
+As soon as TTexplore will find a model which solves `r * 2 == 0xdeadbef0`, it will write the seed into the `./workspace/corpus` directory and at the next libfuzzer refresh, libfuzzer will trigger the `__builtin_trap`. 
 
 ![tt-and-libfuzzer](https://user-images.githubusercontent.com/991046/197147618-fc09e934-7340-4ebb-aa34-6f77be4422d8.gif)
 
 This is a very straightforward example, but it shows how combining multiple sources of fuzzer enhances our chances of finding new paths.
 
-# The ttexplore config structure
+# The TTexplore config structure
 
 You can quickly configure the exploration. There is a structure for that.
 

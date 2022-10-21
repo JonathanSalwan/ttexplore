@@ -152,7 +152,11 @@ namespace triton {
 
           /* Execute instruction */
           triton::arch::Instruction inst(pcval, opcodes.data(), opcodes.size());
-          this->ini_ctx->processing(inst);
+          if (this->ini_ctx->processing(inst) != triton::arch::NO_FAULT) {
+            std::cout << "[TT] Invalid instruction, pc = 0x" << std::hex << pcval << " (writing seed on disk)" << std::endl;
+            this->writeSeedOnDisk("crashes", seed);
+            break;
+          }
 
           //std::cout << inst << std::endl;
 
@@ -254,7 +258,7 @@ namespace triton {
                   this->nbunsat++;
                 }
               }
-              // Enfore the value of the EA into the current path predicate
+              // Enforce the value of the EA into the current path predicate
               this->ini_ctx->pushPathConstraint(ast->equal(ea, ast->bv(ea->evaluate(), ea->getBitvectorSize())));
             }
           }
