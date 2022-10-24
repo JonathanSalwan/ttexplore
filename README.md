@@ -21,7 +21,7 @@ exploration. Then, it does a classical snapshot-based code coverage process. The
 4. Restore the backup
 5. Go to point 2
 
-Note that TTexplore is not an advanced library. It's just a bootstrap code that provide a simple coverage logic. Consider this project as a base example about how to cover code with Triton. You will probably adapt it according to your targets and goals. That's why the code of the library aims to be as small as possible.
+Note that TTexplore is not an advanced library. It's just a bootstrap code that provides a simple coverage logic. Consider this project as a base example about how to cover code with Triton. You will probably adapt it according to your targets and goals. That's why the code of the library aims to be as small as possible.
 
 ## Harness your target
 
