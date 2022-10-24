@@ -503,7 +503,7 @@ extern "C" int LLVMFuzzerTestOneInput(const char* data, size_t size) {
 }
 ```
 
-If we compile this snippet with libfuzzer without optimization (`clang++ -g -O0 -fsanitize=fuzzer,memory target.cpp`), libfuzzer will run for a while before finding `r * 2 == 0xdeadbef0`. In other hand, this kind of constraints are really easy to solve using symbolic execution. So, combining dynamic symbolic execution and runtime fuzzing is something very interesting.
+If we compile this snippet with libfuzzer without optimization (`clang++ -g -O0 -fsanitize=fuzzer,memory target.cpp`), libfuzzer will run for a while before finding `r * 2 == 0xdeadbef0`. In other hand, this kind of constraint is really easy to solve using symbolic execution. So, combining dynamic symbolic execution and runtime fuzzing is something very interesting.
 
 The only thing we have to do is to run libfuzzer with 2 jobs and defining a corpus directory (here the TTexplore workspace). Note that we have to run at least 2 jobs, otherwise libfuzzer will not refresh its corpus, which is an issue as we need to share seeds from TTexplore and libfuzzer.
 
